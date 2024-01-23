@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Name User</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .get_name_form {
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+            text-align: center;
+        }
+
+        .gener_class {
+            margin-bottom: 20px;
+        }
+
+        .name_label {
+            font-size: 18px;
+            display: block;
+            margin-bottom: 8px;
+            font-style:italic;
+
+        }
+
+        .name_input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        #submitButton {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 16px;
+
+        }
+
+        .notification-box{
+            background-color: #f44336;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            border-radius: 20px;
+            display: none;
+            transition: opacity 0.5s ease-in-out;
+            margin-top: 10px;
+        }
+
+        .notification-box.show {
+            display: block;
+            opacity: 1;
+        }
+        .hi{
+            text-align:center;
+            font-family: "Lucida Console", "Courier New", monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <form method="post" class="get_name_form" id="nameForm">
+        {% csrf_token %}
+        <h1 class="hi">Welcome to our site😊</h1>
+        <img src="media/uploads/Sigma.png" style="width:300px;height:150px;">
+        <div class="gener_class">
+            <label class="name_label"><strong>Please write user name?</strong></label>
+            <input class="name_input" name="name_input" id="nameInput" placeholder="Enter username...">
+        </div>
+        <button type="button" id="submitButton">Submit</button>
+        <div class="notification-box" id="notificationBox">Name not found!</div>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('submitButton').addEventListener('click', function () {
+                var nameInput = document.querySelector('.name_input').value;
+                var currentUrl = window.location.href;
+                var notificationBox = document.getElementById('notificationBox');
+
+                // Perform fetch POST request
+                fetch('/api/certificate/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        name_input: nameInput,
+                        current_url: currentUrl
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if ('redirect_url' in data) {
+                        // Redirect to the provided URL in the response
+                        window.location.href = '/student' + data.redirect_url;
+                    } else {
+                        // Handle other responses or display an error message
+                        console.error('Error:', data.message);
+
+                        // Show notification box for 5 seconds
+                        notificationBox.classList.add('show');
+                        setTimeout(function () {
+                            notificationBox.classList.remove('show');
+                        }, 5000);
+                    }
+                })
+                .catch(error => {
+                    // Handle errors
+                    console.error('Error:', error);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
