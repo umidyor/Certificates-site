@@ -11,8 +11,8 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 def get_name(request):
     return render(request,"get_name.html")
-def view_certificate(request, name):
-    form=get_object_or_404(Certificate,name=name)
+def view_certificate(request, slug):
+    form=get_object_or_404(Certificate,slug=slug)
     return render(request,"certificate.html",{'form':form})
 
 
@@ -46,18 +46,25 @@ from rest_framework import status
 #         return Response(data, status=status.HTTP_200_OK)
         # return Response({'name_input':'Atabek'}, status=status.HTTP_200_OK)
 
-class CertificateAPIView(views.APIView):
-    def post(self, request, *args, **kwargs):
-        name_input = request.data.get('name_input', None)
 
-        if name_input is not None:
 
-            try:
-                certificate_exists = Certificate.objects.get(name=name_input)
-                redirect_url = f"/{certificate_exists.name}"
-                return Response({'redirect_url': redirect_url}, status=status.HTTP_200_OK)
-            except:
+from .forms import SearchCertificateForm
+def get_name(request):
+    form = SearchCertificateForm(request.GET)
 
-                return Response({'message': 'Name is not available'}, status=status.HTTP_200_OK)
-        else:
-            return Response({'message': 'Invalid input'}, status=status.HTTP_400_BAD_REQUEST)
+    if form.is_valid():
+        seria = form.cleaned_data['seria']
+        sertificate_id = form.cleaned_data['sertificate_id']
+
+        try:
+            certificate_exists = Certificate.objects.get(seria=seria, sertificate_id=sertificate_id)
+            context = {
+                'form': form,
+                'certificate_exists': certificate_exists,
+            }
+            return render(request, 'found.html', context)
+        except Certificate.DoesNotExist:
+            message="Ushbu sertifikat topilmadi yoki mavjud emas"
+            return render(request, 'get_name.html', {'form': form,'message':message})
+
+    return render(request, 'get_name.html', {'form': form})

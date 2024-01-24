@@ -7,5 +7,5 @@ from django.shortcuts import get_object_or_404
 
 
 from loginapp.models import Certificate
-certificate_exists = get_object_or_404(Certificate,name="maliko")
+certificate_exists = get_object_or_404(Certificate)
 print(certificate_exists.name)
