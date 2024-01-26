@@ -68,3 +68,7 @@ def get_name(request):
             return render(request, 'get_name.html', {'form': form,'message':message})
 
     return render(request, 'get_name.html', {'form': form})
+
+
+def custom_404(request, exception):
+    return render(request, '404.html', status=404)
